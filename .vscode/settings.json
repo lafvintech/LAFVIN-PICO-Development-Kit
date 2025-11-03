@@ -1,0 +1,35 @@
+{
+    // These settings tweaks to the cmake plugin will ensure
+    // that you debug using cortex-debug instead of trying to launch
+    // a Pico binary on the host
+    "cmake.statusbar.advanced": {
+        "debug": {
+            "visibility": "hidden"
+        },
+        "launch": {
+            "visibility": "hidden"
+        },
+        "build": {
+            "visibility": "hidden"
+        },
+        "buildTarget": {
+            "visibility": "hidden"
+        }
+    },
+    "cmake.configureArgs":["-DPICO_OPTIMIZED_DEBUG=1"],
+    "cmake.buildBeforeRun": true,
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "lv_demo_widgets.h": "c",
+        "lv_port_indev.h": "c",
+        "lvgl.h": "c",
+        "lv_demo_benchmark.h": "c",
+        "lv_port_disp.h": "c",
+        "lv_demo_music.h": "c",
+        "lv_demo_keypad_encoder.h": "c"
+    }
+}
