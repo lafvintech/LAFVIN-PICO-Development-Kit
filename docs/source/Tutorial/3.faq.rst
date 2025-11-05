@@ -1,0 +1,86 @@
+3. FAQ
+===========================
+
+Frequently Asked Questions
+
+Hardware Issues
+---------------------------
+
+**Q: Why is the screen not displaying anything?**
+
+A: Please check the following:
+
+* Ensure the Pico is correctly inserted into the baseboard
+* Check USB power supply
+* Verify that the firmware has been flashed successfully
+* Try reflashing the firmware
+
+Performance Issues
+---------------------------
+
+**Q: Why is dragging the color wheel on the screen so slow?**
+
+A: Because the Pico's memory is only 264KB, and the graphic interface may consume significant memory to display graphic widgets. The LVGL library with complex UI elements can be memory-intensive, which affects rendering performance.
+
+**Q: How can I improve UI performance?**
+
+A: Try the following:
+
+* Reduce the number of widgets on the screen
+* Simplify graphics and animations
+* Optimize the LVGL configuration in ``lv_conf.h``
+* Use optimized build settings (``-DPICO_OPTIMIZED_DEBUG=1``)
+
+Software Issues
+---------------------------
+
+**Q: Can I use MicroPython with LVGL to drive the screen?**
+
+A: No, it is not recommended. The Pico lacks sufficient memory for MicroPython + LVGL combination. The firmware may crash or fail to upload due to memory constraints.
+
+**Q: Why does compilation fail with "PICO_SDK_PATH not found"?**
+
+A: Ensure that:
+
+* Pico SDK is properly installed
+* The ``PICO_SDK_PATH`` environment variable is set
+* Run ``source ~/.bashrc`` or restart your terminal
+
+See :doc:`advanced_development/1.development_environment` for detailed setup instructions.
+
+Flashing Issues
+---------------------------
+
+**Q: Why doesn't the RPI-RP2 disk appear when I connect the Pico?**
+
+A: Check:
+
+* Hold the BOOTSEL button while connecting USB
+* Ensure the USB cable supports data transmission (not charge-only)
+* Try a different USB port
+* Try a different USB cable
+
+
+**Q: The firmware flash fails, what should I do?**
+
+A: Try:
+
+* Re-enter flash mode (hold BOOTSEL and reconnect)
+* Ensure the .uf2 file is not corrupted
+* Redownload or recompile the firmware
+
+Other Questions
+---------------------------
+
+**Q: Where can I find more resources and examples?**
+
+A:
+* Pico SDK examples
+* LVGL official examples
+
+**Q: How do I get technical support?**
+
+A: You can:
+
+* Check this FAQ first
+* Contact us via the official website
