@@ -1,0 +1,108 @@
+2. Code Structure Overview
+===========================
+
+This chapter will help you understand the code organization of the project, making it easier for you to perform secondary development and feature expansion.
+
+.. note::
+   This project is based on the **CMake** build system, using **FreeRTOS** real-time operating system and **LVGL** graphics library.
+
+Project Structure
+------------------
+
+The project adopts a modular design, mainly divided into the following parts::
+
+   LAFVIN-PICO-Development-Kit/
+   ├── main.c                          # Main program entry
+   ├── CMakeLists.txt                  # CMake build configuration
+   ├── components/                     # Function components directory
+   ├── generated/                      # LVGL auto-generated UI code
+   ├── Hardware Driver Layer
+   │   ├── st7796.c/h                 # Display driver (ST7796U)
+   │   ├── gt911.c/h                  # Touch screen driver (GT911)
+   │   └── ws2812.pio                 # RGB LED driver (WS2812)
+   ├── LVGL Porting Layer
+   │   ├── lv_conf.h                  # LVGL configuration file
+   │   ├── lv_port_disp.c/h           # Display interface porting
+   │   └── lv_port_indev.c/h          # Input device porting
+   ├── FreeRTOS Configuration
+   │   ├── FreeRTOSConfig.h           # FreeRTOS configuration
+   │   └── FreeRTOS_Kernel_import.cmake
+   └── SDK Import
+       └── pico_sdk_import.cmake       # Pico SDK import script
+
+Core Files Description
+---------------------------
+
+**main.c** - Program entry, includes system initialization, task scheduling, dual-core cooperation and application logic
+
+**CMakeLists.txt** - CMake build configuration, defines compilation options and dependency libraries
+
+Main Code Modules
+------------------
+
+**Hardware Driver Layer**
+
+* **st7796.c/h** - 3.5-inch TFT display driver (via SPI communication)
+* **gt911.c/h** - Capacitive touch screen driver (via I2C communication)
+* **ws2812.pio** - RGB LED driver (using PIO for precise timing)
+
+**LVGL Porting Layer**
+
+* **lv_conf.h** - LVGL configuration file (memory, color depth, feature switches)
+* **lv_port_disp.c/h** - Display interface porting (connects to display driver)
+* **lv_port_indev.c/h** - Input interface porting (connects to touch screen driver)
+
+**Function Components**
+
+* **components/** - Contains hardware demo and calculator application code
+* **generated/** - LVGL UI design tool auto-generated interface code
+
+**System Configuration**
+
+* **FreeRTOSConfig.h** - FreeRTOS configuration (tasks, memory, dual-core support)
+* **pico_sdk_import.cmake** - Pico SDK import script
+
+Hardware Resources Overview
+------------------------------------
+
+**Pin Assignment**
+
+* **GP2-GP7, GP10-GP11**: SPI0 connected to TFT screen
+* **GP8-GP9**: I2C0 connected to touch screen
+* **GP12**: RGB LED (WS2812)
+* **GP13**: Buzzer
+* **GP14-GP15**: Buttons (BTN2, BTN1)
+* **GP16-GP17**: LED indicators (D1, D2)
+* **GP26-GP27**: Joystick (X-axis, Y-axis)
+
+For more detailed hardware resource description, please refer to :doc:`/component_list`
+
+Code Execution Flow
+---------------------------
+
+**Startup Process**
+
+1. Hardware initialization (clock, GPIO, peripherals)
+2. Driver initialization (display, touch screen, LED)
+3. LVGL initialization (register display and input devices)
+4. FreeRTOS startup (create tasks and enter multitasking mode)
+
+**Runtime Architecture**
+
+* **Core0**: Runs LVGL tasks, handles UI updates and touch events
+* **Core1**: Runs hardware monitoring tasks, handles buttons, joystick, buzzer, etc.
+
+Dependencies
+------------------
+
+The project depends on three main libraries (configured during development environment setup):
+
+* **Pico SDK** - RP2040 official development package
+* **FreeRTOS** - Real-time operating system
+* **LVGL** - Graphics library
+
+Next Steps
+------------------
+
+* Continue learning how to compile the project → :doc:`3.编译项目`
+
