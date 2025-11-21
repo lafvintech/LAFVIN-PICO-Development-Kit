@@ -7,7 +7,7 @@ Component List
 .. image:: ./Tutorial/img/LB005_list.jpg
 
 Bill of Materials
-=====================
+------------------
 
 .. list-table:: 
    :header-rows: 1
