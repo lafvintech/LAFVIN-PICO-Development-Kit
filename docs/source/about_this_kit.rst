@@ -3,7 +3,7 @@
 About This Kit
 ===========================
 
-.. figure:: ./Tutorial/img/LB005.jpg
+.. figure:: ./Tutorial/img/main.png
    :alt: LAFVIN PICO Development Kit
    :align: center
    :width: 600
