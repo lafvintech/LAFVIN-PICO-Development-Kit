@@ -4,7 +4,7 @@ Component List
 .. toctree::
     :maxdepth: 1
 
-.. image:: ./Tutorial/img/LB005_list.jpg
+.. image:: ./Tutorial/img/List.jpg
 
 Bill of Materials
 ------------------
@@ -27,4 +27,8 @@ Bill of Materials
    * - M2.5 nuts
      - 4
    * - Acrylic panel
+     - 1
+  * - Acrylic panel
+     - 1
+  * - Blue Phillips screwdriver
      - 1

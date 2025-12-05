@@ -19,12 +19,12 @@ Before starting, please ensure you have the following items:
 Download Firmware File
 ------------------------
 
-#. Visit the project's GitHub repository homepage
+#. Visit the project's GitHub repository homepage: `LAFVIN-PICO-Development-Kit <https://github.com/lafvintech/LAFVIN-PICO-Development-Kit>`_
 
-#. Find and download the ``hello_world.UF2`` file from the repository homepage to your computer
+#. You can find the ``hello_world.UF2`` file on the release page of the project repository and download it to your computer locally
 
    .. tip::
-      You can also find the latest firmware file on the Releases page
+      You can also download the uf2 firmware file directly by clicking this link: `hello_world.UF2 <https://github.com/lafvintech/LAFVIN-PICO-Development-Kit/releases/download/1.0/hello_world.uf2>`_
 
 .. _flashing:
 
@@ -44,16 +44,14 @@ Follow these steps to flash the firmware to your Pico development board:
 
 #. Your computer should recognize a USB storage device named **RPI-RP2**
 
-   .. image:: img/bootsel_connection.png
-      :width: 600
-      :alt: Connect Pico to enter flash mode
+   .. image:: img/pico_usb.png
 
    .. attention::
       If the RPI-RP2 disk does not appear, please check:
       
       * Whether the USB cable supports data transmission (some charging cables do not support data transmission)
       * Whether the BOOTSEL button was held correctly
-      * Try a different USB port
+      * Try a different PC USB port
 
 **Step 2: Copy Firmware File**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -81,7 +79,7 @@ Follow these steps to flash the firmware to your Pico development board:
 
 #. The screen should now display the main interface
 
-   .. image:: img/main_screen.png
+   .. image:: img/1.main_menu.jpg
       :width: 600
       :alt: Main interface display
 
@@ -98,9 +96,10 @@ After flashing is complete, the screen will display two function options:
 * **Hardware Demo** - Hardware function demonstration
 * **Calculator Demo** - Calculator demonstration
 
-.. image:: img/main_menu.png
-   :width: 600
-   :alt: Main menu interface
+.. image:: img/2.hardware_test.jpg
+
+.. image:: img/3.calculator.jpg
+
 
 **Test Hardware Functions**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
