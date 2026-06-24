@@ -104,5 +104,5 @@ The project depends on three main libraries (configured during development envir
 Next Steps
 ------------------
 
-* Continue learning how to compile the project → :doc:`3.编译项目`
+* Continue learning how to compile the project → :doc:`3.compile_project`
 

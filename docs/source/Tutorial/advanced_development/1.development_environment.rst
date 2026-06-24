@@ -93,50 +93,6 @@ Clone the complete source code of this project (including submodules):
 .. attention::
    Be sure to add the ``--recursive`` parameter, which will download FreeRTOS and LVGL submodules at the same time.
 
-Raspberry Pi OS System Setup
-------------------------------------
-
-**Step 1: Prepare Raspberry Pi System**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-#. Prepare an SD card (recommended 16GB or larger)
-
-#. Use `Raspberry Pi Imager <https://www.raspberrypi.com/software/>`_ to flash the system
-
-#. Select **Raspberry Pi OS (64-bit)** Bookworm version
-
-#. Boot the Raspberry Pi and complete the initial setup
-
-**Step 2: Install Development Tools**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Open terminal and execute:
-
-.. code-block:: bash
-
-   sudo apt update
-   sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
-
-**Step 3: Install Pico SDK**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: bash
-
-   cd ~
-   wget https://raw.githubusercontent.com/raspberrypi/pico-setup/refs/heads/master/pico_setup.sh -O pico_setup.sh
-   chmod a+x pico_setup.sh
-   ./pico_setup.sh
-
-Wait for installation to complete (approximately 10-20 minutes).
-
-**Step 4: Download Project Source Code**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: bash
-
-   cd ~
-   git clone --recursive https://github.com/lafvintech/LAFVIN-PICO-Development-Kit.git
-
 Verify Installation
 ---------------------
 
@@ -184,5 +140,5 @@ Next Steps
 After completing the environment setup, you can:
 
 * Understand project code structure → :doc:`2.code_structure`
-* Start compiling the project → :doc:`3.编译项目`
+* Start compiling the project → :doc:`3.compile_project`
 

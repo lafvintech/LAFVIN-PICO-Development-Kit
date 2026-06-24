@@ -6,33 +6,40 @@
 This chapter will guide you through compiling the project source code to generate flashable firmware files.
 
 .. note::
-   Before starting compilation, please ensure you have completed all steps in :doc:`1.development_environment`
+   Before starting compilation, please ensure you have completed all steps in :doc:`1.development_environment`.
 
 Compilation Preparation
 --------------------------
 
 Confirm that you have:
 
-* ✅ Installed Pico SDK and development toolchain
-* ✅ Set the ``PICO_SDK_PATH`` environment variable
-* ✅ Downloaded the project source code (including submodules)
+* Installed the Pico SDK and development toolchain
+* Set the ``PICO_SDK_PATH`` environment variable
+* Downloaded the project source code
+* Initialized project submodules
 
 Quick Start
 ------------------
 
-If you have already configured the environment, you can directly execute the following commands to compile:
+If you have already configured the environment, you can directly execute the following commands from the project root directory.
+
+**Pico W / Pico WH**
 
 .. code-block:: bash
 
    cd ~/LAFVIN-PICO-Development-Kit
-   mkdir build
-   cd build
-   cmake --no-warn-unused-cli \
-         -DPICO_OPTIMIZED_DEBUG=1 \
-         -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
-         -DCMAKE_BUILD_TYPE:STRING=Debug \
-         ../
-   make -j4
+   git submodule update --init --recursive
+   cmake --preset pico-w
+   cmake --build --preset pico-w -j8
+
+**Pico 2 W**
+
+.. code-block:: bash
+
+   cd ~/LAFVIN-PICO-Development-Kit
+   git submodule update --init --recursive
+   cmake --preset pico2-w
+   cmake --build --preset pico2-w -j8
 
 Detailed Compilation Steps
 --------------------------
@@ -44,45 +51,56 @@ Detailed Compilation Steps
 
    cd ~/LAFVIN-PICO-Development-Kit
 
-Confirm you are in the project root directory, you should see the ``CMakeLists.txt`` file.
+Confirm you are in the project root directory. You should see the ``CMakeLists.txt`` and ``CMakePresets.json`` files.
 
-**Step 2: Create Build Directory**
+**Step 2: Choose a Build Preset**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: bash
+The project now uses CMake presets. You do not need to create or enter the build directory manually.
 
-   mkdir build
-   cd build
+.. list-table::
+   :header-rows: 1
+   :widths: 25 45 30
 
-.. tip::
-   Using a separate ``build`` directory keeps the source code directory clean and makes it easy to clean and recompile.
+   * - Preset
+     - Target Board
+     - Output Directory
+   * - ``pico-w``
+     - Pico W / Pico WH. The generated UF2 has also been tested on the original Pico hardware.
+     - ``build/pico_w``
+   * - ``pico2-w``
+     - Pico 2 W
+     - ``build/pico2_w``
 
 **Step 3: Run CMake Configuration**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+For Pico W / Pico WH:
+
 .. code-block:: bash
 
-   cmake --no-warn-unused-cli \
-         -DPICO_OPTIMIZED_DEBUG=1 \
-         -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
-         -DCMAKE_BUILD_TYPE:STRING=Debug \
-         ../
+   cmake --preset pico-w
+
+For Pico 2 W:
+
+.. code-block:: bash
+
+   cmake --preset pico2-w
 
 Parameter descriptions:
 
-* ``--no-warn-unused-cli``: Ignore warnings for unused parameters
-* ``-DPICO_OPTIMIZED_DEBUG=1``: Enable optimized debug mode (**very important**, affects display and peripheral timing)
-* ``-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE``: Generate compilation command database (IDE support)
-* ``-DCMAKE_BUILD_TYPE:STRING=Debug``: Set to debug version
+* ``pico-w``: Configures the project for Pico W / Pico WH.
+* ``pico2-w``: Configures the project for Pico 2 W and enables the kit's active-low button setting.
+* Both presets enable ``PICO_OPTIMIZED_DEBUG=1``, ``CMAKE_EXPORT_COMPILE_COMMANDS=TRUE``, and ``CMAKE_BUILD_TYPE=Debug``.
 
 This command will:
 
 * Check compilation environment and dependencies
 * Find Pico SDK
-* Configure FreeRTOS and LVGL
-* Generate Makefile
+* Configure the correct FreeRTOS kernel and LVGL
+* Generate the build files in ``build/pico_w`` or ``build/pico2_w``
 
-You should see the following output:
+You should see output similar to the following:
 
 .. image:: ../img/cmake_output1.png
 
@@ -92,67 +110,96 @@ You should see the following output:
 **Step 4: Compile Project**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+For Pico W / Pico WH:
+
 .. code-block:: bash
 
-   make -j4
+   cmake --build --preset pico-w -j8
+
+For Pico 2 W:
+
+.. code-block:: bash
+
+   cmake --build --preset pico2-w -j8
 
 Parameter description:
 
-* ``-j4``: Use 4 parallel tasks to accelerate compilation (can be adjusted based on CPU cores)
+* ``-j8``: Use 8 parallel tasks to accelerate compilation. You can adjust this number based on your CPU cores.
 
-The compilation process takes approximately 2-3 minutes, you will see the following output:
+The compilation process takes approximately 2-3 minutes. You will see output similar to the following:
 
 .. image:: ../img/cmake_output2.png
 
 **Step 5: Verify Compilation Results**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After successful compilation, check the generated files:
+After successful compilation, check the generated files.
+
+For Pico W / Pico WH:
 
 .. code-block:: bash
 
-   ls -lh *.uf2
+   ls -lh build/pico_w/*.uf2
+
+For Pico 2 W:
+
+.. code-block:: bash
+
+   ls -lh build/pico2_w/*.uf2
 
 You should see the following file:
 
-* ``hello_world.uf2`` - This is the firmware file that can be flashed to Pico
+* ``hello_world.uf2`` - This is the firmware file that can be flashed to the target board.
+
+Example output:
 
 .. code-block:: bash
 
-   # View file size
-   -rw-r--r-- 1 pi pi 1.3M Nov  5 10:46 hello_world.uf2
+   -rw-r--r-- 1 pi pi 1.3M Nov  5 10:46 build/pico2_w/hello_world.uf2
 
 Recompilation
 ------------------
 
 **Clean and Recompile**
 
-If you need to completely recompile:
+If you need to completely recompile both targets:
 
 .. code-block:: bash
 
-   cd build
-   rm -rf *
-   cmake --no-warn-unused-cli \
-         -DPICO_OPTIMIZED_DEBUG=1 \
-         -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
-         -DCMAKE_BUILD_TYPE:STRING=Debug \
-         ../
-   make -j4
+   rm -rf build/pico_w build/pico2_w
+   cmake --preset pico-w
+   cmake --build --preset pico-w -j8
+   cmake --preset pico2-w
+   cmake --build --preset pico2-w -j8
+
+To clean only one target, remove only its build directory, for example:
+
+.. code-block:: bash
+
+   rm -rf build/pico2_w
+   cmake --preset pico2-w
+   cmake --build --preset pico2-w -j8
 
 **Incremental Compilation**
 
-If you only modified part of the code, run directly:
+If you only modified part of the code, run the build command directly.
+
+For Pico W / Pico WH:
 
 .. code-block:: bash
 
-   cd build
-   make -j4
+   cmake --build --preset pico-w -j8
+
+For Pico 2 W:
+
+.. code-block:: bash
+
+   cmake --build --preset pico2-w -j8
 
 Compilation Output Description
 ----------------------------------
 
-After successful compilation, the ``build`` directory will contain the following files:
+After successful compilation, the selected build directory will contain the following files. For example, Pico 2 W outputs are located in ``build/pico2_w``.
 
 .. list-table::
    :header-rows: 1
@@ -161,9 +208,9 @@ After successful compilation, the ``build`` directory will contain the following
    * - File
      - Description
    * - ``hello_world.uf2``
-     - UF2 firmware file (flash to Pico)
+     - UF2 firmware file, used for flashing the target board
    * - ``hello_world.elf``
-     - ELF format executable file (for debugging)
+     - ELF format executable file, used for debugging
    * - ``hello_world.bin``
      - Binary firmware file
    * - ``hello_world.hex``
@@ -181,4 +228,3 @@ After successful compilation, you can:
 
 .. tip::
    It is recommended to backup the compiled ``hello_world.uf2`` file for future use.
-
