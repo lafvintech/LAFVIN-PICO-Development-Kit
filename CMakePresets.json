@@ -2,18 +2,6 @@
   "version": 2,
   "configurePresets": [
     {
-      "name": "pico",
-      "displayName": "Pico",
-      "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build/pico",
-      "cacheVariables": {
-        "PICO_BOARD": "pico",
-        "PICO_OPTIMIZED_DEBUG": "1",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "TRUE",
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
       "name": "pico-w",
       "displayName": "Pico W / Pico WH",
       "generator": "Unix Makefiles",
@@ -32,6 +20,7 @@
       "binaryDir": "${sourceDir}/build/pico2_w",
       "cacheVariables": {
         "PICO_BOARD": "pico2_w",
+        "BUTTON_ACTIVE_LOW": "1",
         "PICO_OPTIMIZED_DEBUG": "1",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "TRUE",
         "CMAKE_BUILD_TYPE": "Debug"
@@ -39,10 +28,6 @@
     }
   ],
   "buildPresets": [
-    {
-      "name": "pico",
-      "configurePreset": "pico"
-    },
     {
       "name": "pico-w",
       "configurePreset": "pico-w"

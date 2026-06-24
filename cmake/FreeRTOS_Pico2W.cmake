@@ -5,7 +5,7 @@
 # match RP2350 SDK headers and interrupt naming.
 
 if (NOT DEFINED FREERTOS_KERNEL_RP2350_PATH)
-    set(FREERTOS_KERNEL_RP2350_PATH "${CMAKE_CURRENT_LIST_DIR}/components/FreeRTOS-RaspberryPi")
+    set(FREERTOS_KERNEL_RP2350_PATH "${CMAKE_CURRENT_SOURCE_DIR}/components/FreeRTOS-RaspberryPi")
 endif()
 
 if (DEFINED ENV{FREERTOS_KERNEL_RP2350_PATH})
@@ -20,7 +20,7 @@ if (NOT EXISTS "${FREERTOS_KERNEL_RP2350_PATH}")
     message(FATAL_ERROR
         "Pico 2 W requires a newer Raspberry Pi FreeRTOS-Kernel checkout.\n"
         "Clone https://github.com/raspberrypi/FreeRTOS-Kernel.git to:\n"
-        "  ${CMAKE_CURRENT_LIST_DIR}/components/FreeRTOS-RaspberryPi\n"
+        "  ${CMAKE_CURRENT_SOURCE_DIR}/components/FreeRTOS-RaspberryPi\n"
         "or configure with:\n"
         "  -DFREERTOS_KERNEL_RP2350_PATH=/path/to/raspberrypi/FreeRTOS-Kernel")
 endif()
