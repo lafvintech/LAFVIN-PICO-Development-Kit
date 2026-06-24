@@ -16,7 +16,7 @@ Confirm that you have:
 * Installed the Pico SDK and development toolchain
 * Set the ``PICO_SDK_PATH`` environment variable
 * Downloaded the project source code
-* Initialized project submodules
+* Initialized project submodules. If you cloned the project with ``git clone --recursive``, this is already done.
 
 Quick Start
 ------------------
@@ -28,7 +28,6 @@ If you have already configured the environment, you can directly execute the fol
 .. code-block:: bash
 
    cd ~/LAFVIN-PICO-Development-Kit
-   git submodule update --init --recursive
    cmake --preset pico-w
    cmake --build --preset pico-w -j8
 
@@ -37,7 +36,6 @@ If you have already configured the environment, you can directly execute the fol
 .. code-block:: bash
 
    cd ~/LAFVIN-PICO-Development-Kit
-   git submodule update --init --recursive
    cmake --preset pico2-w
    cmake --build --preset pico2-w -j8
 

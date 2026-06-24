@@ -1,66 +1,94 @@
 2. Code Structure Overview
 ===========================
 
-This chapter will help you understand the code organization of the project, making it easier for you to perform secondary development and feature expansion.
+This chapter explains the current project organization so you can find the main application code, hardware drivers, LVGL porting layer, and build configuration more easily.
 
 .. note::
-   This project is based on the **CMake** build system, using **FreeRTOS** real-time operating system and **LVGL** graphics library.
+   This project uses **CMake**, **FreeRTOS**, and **LVGL**. It provides build presets for Pico W / Pico WH and Pico 2 W.
 
 Project Structure
 ------------------
 
-The project adopts a modular design, mainly divided into the following parts::
+The project is organized by responsibility::
 
    LAFVIN-PICO-Development-Kit/
-   ├── main.c                          # Main program entry
-   ├── CMakeLists.txt                  # CMake build configuration
-   ├── components/                     # Function components directory
-   ├── generated/                      # LVGL auto-generated UI code
-   ├── Hardware Driver Layer
-   │   ├── st7796.c/h                 # Display driver (ST7796U)
-   │   ├── gt911.c/h                  # Touch screen driver (GT911)
-   │   └── ws2812.pio                 # RGB LED driver (WS2812)
-   ├── LVGL Porting Layer
-   │   ├── lv_conf.h                  # LVGL configuration file
-   │   ├── lv_port_disp.c/h           # Display interface porting
-   │   └── lv_port_indev.c/h          # Input device porting
-   ├── FreeRTOS Configuration
-   │   ├── FreeRTOSConfig.h           # FreeRTOS configuration
-   │   └── FreeRTOS_Kernel_import.cmake
-   └── SDK Import
-       └── pico_sdk_import.cmake       # Pico SDK import script
+   |-- app/
+   |   |-- main.c                         # Main program entry and demo logic
+   |   `-- assets/
+   |       `-- sea.c                      # LVGL image resource
+   |-- drivers/
+   |   |-- display/
+   |   |   |-- st7796.c
+   |   |   `-- st7796.h                   # ST7796 display driver
+   |   |-- touch/
+   |   |   |-- gt911.c
+   |   |   `-- gt911.h                    # GT911 touch driver
+   |   `-- rgb/
+   |       `-- ws2812.pio                 # WS2812 PIO program
+   |-- ports/
+   |   `-- lvgl/
+   |       |-- lv_port_disp.c/.h          # LVGL display port
+   |       `-- lv_port_indev.c/.h         # LVGL input device port
+   |-- config/
+   |   `-- freertos/
+   |       |-- FreeRTOSConfig.h           # FreeRTOS project configuration
+   |       `-- freertos_rp2350_irq_compat.h
+   |-- cmake/
+   |   |-- FreeRTOS_PicoW.cmake           # FreeRTOS import for Pico W / Pico WH
+   |   `-- FreeRTOS_Pico2W.cmake          # FreeRTOS import for Pico 2 W
+   |-- components/
+   |   |-- lvgl/                          # LVGL submodule
+   |   |-- FreeRTOS/                      # Legacy FreeRTOS submodule for Pico W
+   |   `-- FreeRTOS-RaspberryPi/          # Raspberry Pi FreeRTOS submodule for Pico 2 W
+   |-- CMakeLists.txt                     # Main build configuration
+   |-- CMakePresets.json                  # Build presets
+   |-- lv_conf.h                          # LVGL configuration
+   `-- pico_sdk_import.cmake              # Pico SDK import script
 
-Core Files Description
+Core Files
 ---------------------------
 
-**main.c** - Program entry, includes system initialization, task scheduling, dual-core cooperation and application logic
-
-**CMakeLists.txt** - CMake build configuration, defines compilation options and dependency libraries
+* ``app/main.c`` - Program entry point, system initialization, FreeRTOS task creation, UI demo logic, hardware demo logic, and calculator logic.
+* ``CMakeLists.txt`` - Main build file. It selects the board, source files, include paths, libraries, PIO header generation, and compile definitions.
+* ``CMakePresets.json`` - Defines the supported build presets: ``pico-w`` and ``pico2-w``.
+* ``config/freertos/FreeRTOSConfig.h`` - FreeRTOS configuration shared by the supported boards.
+* ``config/freertos/freertos_rp2350_irq_compat.h`` - Compatibility header used only when building Pico 2 W.
 
 Main Code Modules
 ------------------
 
+**Application Layer**
+
+* ``app/main.c`` - Creates the FreeRTOS tasks, initializes LVGL, builds the startup screen, and handles the hardware demo and calculator demo.
+* ``app/assets/sea.c`` - Image data used by the startup screen.
+
 **Hardware Driver Layer**
 
-* **st7796.c/h** - 3.5-inch TFT display driver (via SPI communication)
-* **gt911.c/h** - Capacitive touch screen driver (via I2C communication)
-* **ws2812.pio** - RGB LED driver (using PIO for precise timing)
+* ``drivers/display/st7796.c/.h`` - 3.5-inch TFT display driver using SPI.
+* ``drivers/touch/gt911.c/.h`` - Capacitive touch screen driver using I2C.
+* ``drivers/rgb/ws2812.pio`` - PIO program for the WS2812 RGB LED.
 
 **LVGL Porting Layer**
 
-* **lv_conf.h** - LVGL configuration file (memory, color depth, feature switches)
-* **lv_port_disp.c/h** - Display interface porting (connects to display driver)
-* **lv_port_indev.c/h** - Input interface porting (connects to touch screen driver)
+* ``lv_conf.h`` - LVGL configuration file, including memory, color depth, fonts, and feature switches.
+* ``ports/lvgl/lv_port_disp.c/.h`` - Connects LVGL drawing to the ST7796 display driver.
+* ``ports/lvgl/lv_port_indev.c/.h`` - Connects LVGL input handling to the GT911 touch driver.
 
-**Function Components**
+**Build and System Configuration**
 
-* **components/** - Contains hardware demo and calculator application code
-* **generated/** - LVGL UI design tool auto-generated interface code
+* ``cmake/FreeRTOS_PicoW.cmake`` - Uses ``components/FreeRTOS`` for Pico W / Pico WH builds.
+* ``cmake/FreeRTOS_Pico2W.cmake`` - Uses ``components/FreeRTOS-RaspberryPi`` for Pico 2 W builds.
+* ``CMakePresets.json`` - Keeps the Pico W and Pico 2 W build commands short and repeatable.
 
-**System Configuration**
+Generated Files
+------------------
 
-* **FreeRTOSConfig.h** - FreeRTOS configuration (tasks, memory, dual-core support)
-* **pico_sdk_import.cmake** - Pico SDK import script
+PIO headers are generated during the CMake build under the selected build directory, for example:
+
+* ``build/pico_w/generated/ws2812.pio.h``
+* ``build/pico2_w/generated/ws2812.pio.h``
+
+These generated files are not stored in the source tree.
 
 Hardware Resources Overview
 ------------------------------------
@@ -75,34 +103,36 @@ Hardware Resources Overview
 * **GP16-GP17**: LED indicators (D1, D2)
 * **GP26-GP27**: Joystick (X-axis, Y-axis)
 
-For more detailed hardware resource description, please refer to :doc:`/component_list`
+For more detailed hardware resource description, please refer to :doc:`/component_list`.
 
 Code Execution Flow
 ---------------------------
 
 **Startup Process**
 
-1. Hardware initialization (clock, GPIO, peripherals)
-2. Driver initialization (display, touch screen, LED)
-3. LVGL initialization (register display and input devices)
-4. FreeRTOS startup (create tasks and enter multitasking mode)
+1. Initialize the standard Pico SDK runtime.
+2. Initialize LVGL.
+3. Initialize the display and touch porting layers.
+4. Create the LVGL mutex.
+5. Create FreeRTOS tasks.
+6. Start the FreeRTOS scheduler.
 
 **Runtime Architecture**
 
-* **Core0**: Runs LVGL tasks, handles UI updates and touch events
-* **Core1**: Runs hardware monitoring tasks, handles buttons, joystick, buzzer, etc.
+* ``task0`` creates the startup UI and handles slower hardware monitoring, such as joystick updates.
+* ``task1`` runs ``lv_task_handler()`` and processes LVGL-safe UI updates.
+* GPIO interrupts handle button press events and update physical LED state.
 
 Dependencies
 ------------------
 
-The project depends on three main libraries (configured during development environment setup):
+The project depends on these main libraries:
 
-* **Pico SDK** - RP2040 official development package
+* **Pico SDK** - Raspberry Pi Pico development SDK
 * **FreeRTOS** - Real-time operating system
 * **LVGL** - Graphics library
 
 Next Steps
 ------------------
 
-* Continue learning how to compile the project → :doc:`3.compile_project`
-
+* Continue learning how to compile the project: :doc:`3.compile_project`
