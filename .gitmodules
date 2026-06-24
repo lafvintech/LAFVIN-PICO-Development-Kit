@@ -4,3 +4,6 @@
 [submodule "components/FreeRTOS"]
 	path = components/FreeRTOS
 	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git
+[submodule "components/FreeRTOS-RaspberryPi"]
+	path = components/FreeRTOS-RaspberryPi
+	url = https://github.com/raspberrypi/FreeRTOS-Kernel.git
