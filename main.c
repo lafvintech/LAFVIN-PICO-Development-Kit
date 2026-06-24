@@ -15,6 +15,7 @@
 #include "lvgl.h"
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
+#include "st7796.h"
 
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
@@ -23,6 +24,10 @@
 #include "pico/bootrom.h"
 
 #include "ws2812.pio.h"
+
+#ifndef PICO2W_LCD_SMOKE_TEST
+#define PICO2W_LCD_SMOKE_TEST 0
+#endif
 
 // ========================================
 // GPIO Pin Definitions
@@ -36,6 +41,16 @@
 #define GPIO_LED_2          17  // LED 2 output
 #define GPIO_ADC_X          26  // Joystick X-axis ADC
 #define GPIO_ADC_Y          27  // Joystick Y-axis ADC
+
+#ifndef BUTTON_ACTIVE_LOW
+#define BUTTON_ACTIVE_LOW   0
+#endif
+
+#if BUTTON_ACTIVE_LOW
+#define BUTTON_IRQ_EDGE     GPIO_IRQ_EDGE_FALL
+#else
+#define BUTTON_IRQ_EDGE     GPIO_IRQ_EDGE_RISE
+#endif
 
 // LVGL Mutex - Ensures thread safety (required by LVGL official documentation)
 SemaphoreHandle_t lvgl_mutex = NULL;
@@ -65,6 +80,8 @@ static bool buzzer_state = false;
 // Button debounce tracking
 static uint32_t btn1_last_time = 0;
 static uint32_t btn2_last_time = 0;
+static volatile bool btn1_led_pending = false;
+static volatile bool btn2_led_pending = false;
 #define BTN_DEBOUNCE_MS 50
 
 // Joystick ADC configuration
@@ -75,6 +92,40 @@ static uint32_t btn2_last_time = 0;
 // Forward function declarations
 static void reboot_handler(lv_event_t *e);
 void on_button_interrupt(uint gpio_pin, uint32_t events);
+
+#if PICO2W_LCD_SMOKE_TEST
+static void lcd_smoke_fill(uint16_t color)
+{
+    static uint16_t line[ST7796_WIDTH];
+
+    for (uint16_t x = 0; x < ST7796_WIDTH; x++) {
+        line[x] = color;
+    }
+
+    for (uint16_t y = 0; y < ST7796_HEIGHT; y++) {
+        st7796_set_window(0, y, ST7796_WIDTH - 1, y);
+        st7796_write_color(line, ST7796_WIDTH);
+    }
+}
+
+static void lcd_smoke_test_loop(void)
+{
+    const uint16_t colors[] = {
+        0x00F8, // red, byte-swapped RGB565 for SPI byte order
+        0xE007, // green
+        0x1F00, // blue
+        0xFFFF, // white
+        0x0000  // black
+    };
+
+    while (true) {
+        for (uint i = 0; i < sizeof(colors) / sizeof(colors[0]); i++) {
+            lcd_smoke_fill(colors[i]);
+            sleep_ms(800);
+        }
+    }
+}
+#endif
 
 // Calculator related variables
 lv_obj_t *calc_display = NULL;
@@ -372,6 +423,17 @@ static int map_adc_with_deadzone(uint adc_raw, int max_pos, bool invert)
 /**
  * @brief Initialize all hardware peripherals
  */
+static void init_button_input(uint gpio_pin)
+{
+    gpio_init(gpio_pin);
+    gpio_set_dir(gpio_pin, GPIO_IN);
+#if BUTTON_ACTIVE_LOW
+    gpio_pull_up(gpio_pin);
+#else
+    gpio_pull_down(gpio_pin);
+#endif
+}
+
 static void init_hardware_peripherals(void)
 {
     // Buzzer GPIO setup
@@ -385,12 +447,7 @@ static void init_hardware_peripherals(void)
     uint ws2812_offset = pio_add_program(rgb_pio, &ws2812_program);
     ws2812_program_init(rgb_pio, rgb_sm, ws2812_offset, GPIO_WS2812, 800000, true);
     ws2812_write(0, 0, 0);  // Turn off LED initially
-    
-    // Button interrupts with debouncing
-    gpio_set_irq_enabled_with_callback(GPIO_BUTTON_1, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &on_button_interrupt);
-    gpio_set_irq_enabled_with_callback(GPIO_BUTTON_2, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &on_button_interrupt);
-    gpio_set_irq_enabled_with_callback(GPIO_BUTTON_RESET, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &on_button_interrupt);
-    
+
     // Physical LED GPIOs
     gpio_init(GPIO_LED_1);
     gpio_init(GPIO_LED_2);
@@ -398,6 +455,16 @@ static void init_hardware_peripherals(void)
     gpio_set_dir(GPIO_LED_2, GPIO_OUT);
     gpio_put(GPIO_LED_1, 0);
     gpio_put(GPIO_LED_2, 0);
+
+    // Button GPIOs are explicitly pulled to the inactive level.
+    init_button_input(GPIO_BUTTON_1);
+    init_button_input(GPIO_BUTTON_2);
+    init_button_input(GPIO_BUTTON_RESET);
+
+    // Button interrupts with debouncing
+    gpio_set_irq_enabled_with_callback(GPIO_BUTTON_1, BUTTON_IRQ_EDGE, true, &on_button_interrupt);
+    gpio_set_irq_enabled(GPIO_BUTTON_2, BUTTON_IRQ_EDGE, true);
+    gpio_set_irq_enabled(GPIO_BUTTON_RESET, BUTTON_IRQ_EDGE, true);
     
     // Enable joystick ADC reading
     joystick_enabled = true;
@@ -489,8 +556,8 @@ static void create_hardware_ui(void)
  */
 void on_button_interrupt(uint gpio_pin, uint32_t events)
 {
-    // Only handle button press (rising edge)
-    if (!(events & GPIO_IRQ_EDGE_RISE)) return;
+    // Only handle the configured press edge.
+    if (!(events & BUTTON_IRQ_EDGE)) return;
     
     uint32_t now = to_ms_since_boot(get_absolute_time());
     
@@ -498,16 +565,16 @@ void on_button_interrupt(uint gpio_pin, uint32_t events)
         // Debounce check for button 1
         if (now - btn1_last_time > BTN_DEBOUNCE_MS) {
             btn1_last_time = now;
-            lv_led_toggle(led1);
             gpio_put(GPIO_LED_1, !gpio_get(GPIO_LED_1));  // Toggle LED GPIO
+            btn1_led_pending = true;
         }
     } 
     else if (gpio_pin == GPIO_BUTTON_2) {
         // Debounce check for button 2
         if (now - btn2_last_time > BTN_DEBOUNCE_MS) {
             btn2_last_time = now;
-            lv_led_toggle(led2);
             gpio_put(GPIO_LED_2, !gpio_get(GPIO_LED_2));  // Toggle LED GPIO
+            btn2_led_pending = true;
         }
     }
 }
@@ -621,6 +688,18 @@ void task1(void *pvParam)
     {
         // Must lock mutex before/after lv_task_handler (LVGL official requirement)
         xSemaphoreTake(lvgl_mutex, portMAX_DELAY);
+        if (btn1_led_pending) {
+            btn1_led_pending = false;
+            if (led1 != NULL) {
+                lv_led_toggle(led1);
+            }
+        }
+        if (btn2_led_pending) {
+            btn2_led_pending = false;
+            if (led2 != NULL) {
+                lv_led_toggle(led2);
+            }
+        }
         lv_task_handler();
         xSemaphoreGive(lvgl_mutex);
         
@@ -634,6 +713,11 @@ int main()
 
     lv_init();
     lv_port_disp_init();
+
+#if PICO2W_LCD_SMOKE_TEST
+    lcd_smoke_test_loop();
+#endif
+
     lv_port_indev_init();
 
     // Create LVGL mutex (must be created before task startup)
@@ -645,17 +729,20 @@ int main()
         }
     }
 
-    UBaseType_t task0_CoreAffinityMask = (1 << 0);
-    UBaseType_t task1_CoreAffinityMask = (1 << 1);
-
     TaskHandle_t task0_Handle = NULL;
 
     xTaskCreate(task0, "task0", 2048, NULL, 1, &task0_Handle);
+#if (configUSE_CORE_AFFINITY == 1)
+    UBaseType_t task0_CoreAffinityMask = (1 << 0);
     vTaskCoreAffinitySet(task0_Handle, task0_CoreAffinityMask);
+#endif
 
     TaskHandle_t task1_Handle = NULL;
     xTaskCreate(task1, "task1", 2048, NULL, 2, &task1_Handle);
+#if (configUSE_CORE_AFFINITY == 1)
+    UBaseType_t task1_CoreAffinityMask = (1 << 1);
     vTaskCoreAffinitySet(task1_Handle, task1_CoreAffinityMask);
+#endif
 
     vTaskStartScheduler();
 
