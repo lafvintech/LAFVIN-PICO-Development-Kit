@@ -1,7 +1,9 @@
 # PICO Development Kit
 
 ## Overview
-This is the complete demo code for PICO Development Kit with 3.5-inch TFT capacitive touch screen.
+This is the complete demo code for the PICO Development Kit with a 3.5-inch TFT capacitive touch screen.
+
+The project currently provides build presets for **Pico W / Pico WH** and **Pico 2 W**. The Pico W UF2 has also been tested on the original Pico hardware.
 
 ## Features
 * **Hardware Demo Mode**
@@ -19,6 +21,55 @@ This is the complete demo code for PICO Development Kit with 3.5-inch TFT capaci
   - Based on FreeRTOS real-time operating system
   - LVGL graphical interface
   - Dual-core task scheduling
+
+## Build
+
+### Prerequisites
+
+Install and configure the Raspberry Pi Pico SDK toolchain first. Pico 2 W builds require Pico SDK 2.1.0 or later.
+
+Clone submodules before building:
+
+```bash
+git submodule update --init --recursive
+```
+
+This project uses two FreeRTOS kernel checkouts:
+
+| Board preset | FreeRTOS path |
+|---|---|
+| `pico-w` | `components/FreeRTOS` |
+| `pico2-w` | `components/FreeRTOS-RaspberryPi` |
+
+### Pico W / Pico WH
+
+```bash
+cmake --preset pico-w
+cmake --build --preset pico-w -j8
+```
+
+The UF2 is generated under:
+
+```text
+build/pico_w/hello_world.uf2
+```
+
+This UF2 can also be used on the original Pico hardware in the tested kit setup.
+
+### Pico 2 W
+
+```bash
+cmake --preset pico2-w
+cmake --build --preset pico2-w -j8
+```
+
+The UF2 is generated under:
+
+```text
+build/pico2_w/hello_world.uf2
+```
+
+The `pico2-w` preset enables active-low button handling for this kit.
 
 ## Hardware Specifications
 
