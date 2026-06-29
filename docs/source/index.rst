@@ -1,6 +1,8 @@
 LAFVIN-PICO-Development_Kit
 ====================================
 
+.. image:: Tutorial/img/LB005.jpg
+
 .. toctree::
    :maxdepth: 2
 

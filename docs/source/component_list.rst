@@ -28,7 +28,7 @@ Bill of Materials
      - 4
    * - Acrylic panel
      - 1
-  * - Acrylic panel
+   * - Acrylic panel
      - 1
-  * - Blue Phillips screwdriver
+   * - Blue Phillips screwdriver
      - 1
