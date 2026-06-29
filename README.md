@@ -108,4 +108,4 @@ The `pico2-w` preset enables active-low button handling for this kit.
 | I2C0 SDA GP8 | SDA |
 | I2C0 SCL GP9 | SCL |
 
-Online Tutorial: www.readthedocs.com
+Online Tutorial: https://lafvin-pico-development-kit.readthedocs.io/en/latest
